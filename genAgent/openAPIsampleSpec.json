@@ -1,0 +1,30 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Account Details API",
+    "description": "This API retrieves the account name given a specific account number.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000"
+    }
+  ],
+  "paths": {
+    "/api/getAccountDetails": {
+      "get": {
+        "summary": "getAccountDetails",
+        "description": "Retrieve the name of the account using a given account id or account number",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "accountNumber",
+            "required": true,
+            "schema": {"type": "string"},
+            "description": "The unique identifier of an account."
+          }
+        ]
+      }
+    }
+  }
+}
