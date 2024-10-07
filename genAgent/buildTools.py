@@ -4,7 +4,7 @@ import jsonref
 from pprint import pp
 
 def readOpenAPISpec():
-    with open('genAgent/openAPIsampleSpec.json', 'r') as f:
+    with open('/Users/akhiltadiparthi/Documents/GitHub/agenticChatbot/genAgent/openAPIsampleSpec.json', 'r') as f:
         openAPIspec = jsonref.loads(f.read())
     return openAPIspec
 

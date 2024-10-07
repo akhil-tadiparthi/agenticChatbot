@@ -1,9 +1,11 @@
 import os
+import sys
 import requests
 import json
 import openai
 from dotenv import load_dotenv
 load_dotenv()
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../')
 from genAgent import buildExternalEndpoints, buildTools
 from typing import List
 from langchain_core.tools import tool
@@ -29,6 +31,24 @@ non_tools_llm = ChatOllama(
     temperature=0,
 )
 
+def executeFunction(toolName, functionParams):
+        print(f"Executing function {toolName} with args {functionParams}")
+        endpointURL, httpMethod, headers = buildExternalEndpoints.buildRestEndpoint(toolName, functionParams)
+        print('Built the rest endpoint  ' + endpointURL)
+        try:
+            response = requests.get(endpointURL, headers=headers)
+
+            if not response.content:
+                return f"{toolName} executed successfully"
+            else:
+                response.raise_for_status()
+                data = response.json()
+                print("data:   ", data)
+                return data
+
+        except requests.exceptions.RequestException as e:
+            return {"error": str(e)}
+
 def check_tool_selection(tool_calls, question):
     checker_prompt = f"""
         As a checker agent, determine if the tool calls made are appropriate for the question.
@@ -46,12 +66,16 @@ def check_tool_selection(tool_calls, question):
 
 def agent_workflow(question):
     result = llm.invoke(question)
+    print(result)
     if result.tool_calls:
         print("Possible Tool Call:")
         print(result.tool_calls)
         print('\n')
         if check_tool_selection(result.tool_calls, question):
             print("Tool calls accepted.")
+            tool_name, function_name = result.tool_calls[0].get("name"), result.tool_calls[0].get("args")
+            first_chat_response = executeFunction(tool_name, function_name)
+            print(first_chat_response)
             print("Final result:")
             print(result.content)
             print('\n')
