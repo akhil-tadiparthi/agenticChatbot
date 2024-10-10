@@ -75,6 +75,7 @@ def agent_workflow(question):
             print("Tool calls accepted.")
             tool_name, function_name = result.tool_calls[0].get("name"), result.tool_calls[0].get("args")
             first_chat_response = executeFunction(tool_name, function_name)
+
             print(first_chat_response)
             print("Final result:")
             print(result.content)
