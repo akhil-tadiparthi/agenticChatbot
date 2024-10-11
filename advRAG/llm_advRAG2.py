@@ -15,12 +15,13 @@ class RAGagent:
         self.llm = ChatOllama(model=self.local_llm, temperature=0)
         self.llm_json_mode = ChatOllama(model=self.local_llm, temperature=0, format="json")
         os.environ["TOKENIZERS_PARALLELISM"] = "true"
-        self.urls = [
-            "https://lilianweng.github.io/posts/2023-06-23-agent/",
-            "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/",
-            "https://lilianweng.github.io/posts/2023-10-25-adv-attack-llm/",
-        ]
-    
+        self.urls = []
+        self.retriever = self.documet_processing()
+        self.question = "What is Chain of thought prompting?"
+
+
+
+    def documet_processing(self):
         # Load documents
         docs = [WebBaseLoader(url).load() for url in self.urls]
         docs_list = [item for sublist in docs for item in sublist]
@@ -37,9 +38,7 @@ class RAGagent:
             embedding=HuggingFaceEmbeddings(),
         )
 
-        # Create retriever
-        self.retriever = vectorstore.as_retriever(k=3)
-        self.question = "What is Chain of thought prompting?"
+        return vectorstore.as_retriever(k=3)
 
 
 
@@ -56,10 +55,10 @@ class RAGagent:
         Return JSON with single key, binary_score, that is 'yes' or 'no' score to indicate whether the document contains at least some information that is relevant to the question."""
 
         # Test
-        docs = self.retriever.invoke(question)
+        docs = self.retriever.invoke(self.question)
         doc_txt = docs[1].page_content
         doc_grader_prompt_formatted = doc_grader_prompt.format(
-            document=doc_txt, question=question
+            document=doc_txt, question=self.question
         )
         result = self.llm_json_mode.invoke(
             [SystemMessage(content=doc_grader_instructions)]
@@ -99,6 +98,15 @@ class RAGagent:
         rag_prompt_formatted = rag_prompt.format(context=docs_txt, question=self.question)
         generation = self.llm.invoke([HumanMessage(content=rag_prompt_formatted)])
         print(generation.content)
+
+
+rag_agent = RAGagent()
+rag_agent.documet_processing()
+rag_agent.retrieval_grader()
+rag_agent.generator()
+
+
+
 
 
 

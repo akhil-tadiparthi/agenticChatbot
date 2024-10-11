@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/../')
 from genAgent import buildExternalEndpoints, buildTools
+from advRAG import llm_advRAG
 from typing import List
 from langchain_core.tools import tool
 from langchain_ollama import ChatOllama
@@ -82,12 +83,22 @@ def agent_workflow(question):
             print('\n')
             return
         else:
-            print("Checker agent did not accept the tool calls, so no tool calls made. Using regular chat completion: ")
-            completion_result_stream = non_tools_llm.stream(question)
-            for chunk in completion_result_stream:
-                print(chunk.content, end='', flush=True)
+            # print("Checker agent did not accept the tool calls, so no tool calls made. Using regular chat completion: ")
+            # completion_result_stream = non_tools_llm.stream(question)
+            # for chunk in completion_result_stream:
+            #     print(chunk.content, end='', flush=True)
+            # print('\n')
+            # return
+
+            # FOR RAGGGGG
+            print("Checker agent did not accept the tool calls, so no tool calls made. Using RAG: ")
+            result = llm_advRAG.rag(question)
+            result  = result.get("result")
+            print(result)
             print('\n')
             return
+
+
 
 if __name__ == "__main__":
     while True:
