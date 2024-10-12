@@ -2,7 +2,6 @@ import os
 from langchain.chains import RetrievalQA
 from langchain_unstructured import UnstructuredLoader
 from langchain_community.llms import Ollama
-from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_chroma import Chroma
@@ -20,7 +19,6 @@ def filter_complex_metadata(document):
         # Add more conditions as needed
     # Return a new Document with simplified metadata
     return Document(page_content=document.page_content, metadata=simplified_metadata)
-
 
 def rag(user_question):
     # Load the document
