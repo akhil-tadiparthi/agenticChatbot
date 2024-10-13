@@ -95,7 +95,6 @@ def agent_workflow(user_prompt):
             print("Checker agent did not accept the tool calls, so no tool calls made. Using RAG: ")
             rag_agent = llm_advRAG.RAG()
             result = rag_agent.perform_RAG(user_prompt)
-            result  = result.get("result")
             print(result)
             print('\n')
             return

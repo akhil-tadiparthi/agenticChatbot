@@ -93,11 +93,11 @@ class RAG:
             retriever=self.vector_store.as_retriever()
         )
         llm_response = chain.invoke({"query": user_prompt})
-        return llm_response
+        return llm_response.get('result')
 
 
-if __name__ == "__main__":
-    question = input("Enter your question (or type 'exit' to quit): ")
-    rag_agent = RAG()
-    rag_response = rag_agent.perform_RAG(question)
-    print(rag_response)
+# if __name__ == "__main__":
+#     question = input("Enter your question (or type 'exit' to quit): ")
+#     rag_agent = RAG()
+#     rag_response = rag_agent.perform_RAG(question)
+#     print(rag_response)
