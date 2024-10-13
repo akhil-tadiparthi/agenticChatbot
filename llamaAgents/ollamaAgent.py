@@ -50,14 +50,14 @@ def executeFunction(toolName, functionParams):
         except requests.exceptions.RequestException as e:
             return {"error": str(e)}
 
-def check_tool_selection(tool_calls, question):
+def check_tool_selection(tool_calls, user_prompt):
     checker_prompt = f"""
-        As a checker agent, determine if the tool calls made are appropriate for the question.
+        As a checker agent, determine if the tool calls made are appropriate for the user prompt.
 
-        Question: {question}
+        User prompt: {user_prompt}
         Tool calls made: {tool_calls}
 
-        Did the agent use the correct tools to answer the question? Answer 'Yes' or 'No'.
+        Did the agent use the correct tools to answer the user prompt? Answer 'Yes' or 'No'.
     """
     checker_response = checker_llm.invoke(checker_prompt)
     print("Checker agent response:")
@@ -65,14 +65,14 @@ def check_tool_selection(tool_calls, question):
     print('\n')
     return True if 'Yes' in checker_response.content else False
 
-def agent_workflow(question):
-    result = llm.invoke(question)
+def agent_workflow(user_prompt):
+    result = llm.invoke(user_prompt)
     print(result)
     if result.tool_calls:
         print("Possible Tool Call:")
         print(result.tool_calls)
         print('\n')
-        if check_tool_selection(result.tool_calls, question):
+        if check_tool_selection(result.tool_calls, user_prompt):
             print("Tool calls accepted.")
             tool_name, function_name = result.tool_calls[0].get("name"), result.tool_calls[0].get("args")
             first_chat_response = executeFunction(tool_name, function_name)
@@ -83,16 +83,18 @@ def agent_workflow(question):
             print('\n')
             return
         else:
+            # For Regular Chat Completion
             # print("Checker agent did not accept the tool calls, so no tool calls made. Using regular chat completion: ")
-            # completion_result_stream = non_tools_llm.stream(question)
+            # completion_result_stream = non_tools_llm.stream(user_prompt)
             # for chunk in completion_result_stream:
             #     print(chunk.content, end='', flush=True)
             # print('\n')
             # return
 
-            # FOR RAGGGGG
+            # FOR RAG
             print("Checker agent did not accept the tool calls, so no tool calls made. Using RAG: ")
-            result = llm_advRAG.rag(question)
+            rag_agent = llm_advRAG.RAG()
+            result = rag_agent.perform_RAG(user_prompt)
             result  = result.get("result")
             print(result)
             print('\n')
@@ -102,8 +104,8 @@ def agent_workflow(question):
 
 if __name__ == "__main__":
     while True:
-        question = input("Enter your question (or type 'exit' to quit): ")
-        if question.lower() == 'exit':
+        user_prompt = input("Enter your prompt (or type 'exit' to quit): ")
+        if user_prompt.lower() == 'exit':
             print("Goodbye!")
             break
-        agent_workflow(question)
+        agent_workflow(user_prompt)
